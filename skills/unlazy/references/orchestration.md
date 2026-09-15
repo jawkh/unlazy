@@ -1,6 +1,9 @@
 # Orchestrated mode
 
-Use orchestrated mode when one context cannot hold the task and its verification at full attention. Keep the driver responsible for planning, dispatch, independent verification, integration, and the root report.
+Choose orchestrated mode proactively when sizeable independent work or separate
+context improves delivery enough to justify coordination. Context exhaustion is
+not a prerequisite. Keep the driver responsible for dispatch, required
+re-verification, integration, and the root outcome.
 
 ## Declare states and paths
 
@@ -16,7 +19,7 @@ Use `OPEN`, `VERIFIED`, or `ABANDONED` for branches. Store leaf ledgers as `gate
 
 ## Driver loop
 
-1. **Plan before fan-out.** Create `.unlazy/<scope>/PLAN.md`, `.unlazy/<scope>/GATES.md`, and one ledger per leaf and branch from the templates. Fix interfaces, naming, toolchain, dependencies, and exact ownership before dispatch.
+1. **Plan before fan-out.** Reuse the contract. Create or update `.unlazy/<scope>/PLAN.md`, `.unlazy/<scope>/GATES.md`, and one ledger per actual leaf and integration branch. Record necessary interfaces, toolchain, dependencies, and ownership, not a second implementation specification.
 2. **Inspect and approve checks.** Run `gate-check --status` on every inherited ledger. Review each `CHECK:`, `EXPECT:`, and `CWD:`, including called scripts. Determine the shell and inherited `PATH`; a new oracle with no exact approval prints its resolved values during a normal run without executing. Use `--approve` only after inspection, and do not treat normal mode as a dry run once approval exists.
 3. **Claim every concurrent leaf.** Run:
 
@@ -25,14 +28,14 @@ Use `OPEN`, `VERIFIED`, or `ABANDONED` for branches. Store leaf ledgers as `gate
    ```
 
    A refused claim means the split is not safe for concurrent dispatch. Change the plan or run the work sequentially; never bypass the refusal.
-4. **Dispatch ready leaves.** Give each leaf only the shared contract, its exact ownership and dependencies, its own ledger, and the four-pass completion rule. Do not leak unrelated leaf histories.
+4. **Dispatch ready leaves.** Give each leaf the shared contract, ownership, dependencies, its ledger, remaining limits, and the contract-based stop rule in `SKILL.md`. Use native task/fleet tools with runtime-supported model routing. Do not leak unrelated histories or require a fixed number of improvement passes.
 5. **Verify each return independently.** Re-run the returned leaf's runnable gates, including already checked gates:
 
    ```text
    node <skill-dir>/scripts/gate-check.mjs --root . --cwd . --reverify .unlazy/<scope>/gates/leaf-1.2.1.md
    ```
 
-   `--status` alone is not re-verification. If an approved oracle changed, inspect it and approve the new oracle before continuing. Review manual gates directly and try to refute at least one passed gate.
+   `--status` alone is not re-verification. If an approved oracle changed, inspect it and approve the new oracle before continuing. Review manual evidence against the named risk; add a negative probe when that risk warrants it, not merely to fill a quota.
 6. **Append status and roll forward.** Record the result without rewriting history:
 
    ```text
@@ -40,8 +43,8 @@ Use `OPEN`, `VERIFIED`, or `ABANDONED` for branches. Store leaf ledgers as `gate
    ```
 
    Mark the leaf `VERIFIED`, promote newly unblocked leaves from `WAITING` to `READY`, and dispatch them without waiting for unrelated in-flight leaves.
-7. **Integrate bottom-up.** Work each `node-*.md` ledger only after all named children return. Reverify the children, then run interface, end-to-end, and regression checks.
-8. **Release and report.** Release all scope leases after final verification. Report only when the root ledger is met. Surface every abandonment and remeasure every reported count.
+7. **Integrate bottom-up.** Work each `node-*.md` ledger only after its dependencies are verified. Reuse the driver's child re-verification from step 5 if the relevant state is unchanged; rerun affected gates after integration changes. Run the branch's required interface, end-to-end, and regression checks.
+8. **Release and report.** Release scope leases on completion or abort. Claim completion only when the root ledger is met. Report unmet or abandoned requirements as incomplete; recalculate reported counts. Do not add a polish pass after acceptance.
 
 ## Check concurrency
 
@@ -61,7 +64,13 @@ Treat dispatch as a loop:
 
 ```text
 while an unverified leaf remains:
-  dispatch each READY leaf whose ownership is claimed
+  if a blocker limit is reached:
+    pause affected dispatch and report the required decision
+    preserve live-operation monitoring and cleanup
+  dispatch READY leaves with claimed ownership whose contract and safety
+    cannot change under the pending decisions
+  if no leaf is IN-FLIGHT:
+    report the unmet requirements and stop
   wait for the next leaf to return
   reverify that leaf and review its manual evidence
   append status and update its declared state
@@ -92,4 +101,7 @@ Do not call a leaf `VERIFIED` merely because every runnable gate passed.
 
 ## When not to orchestrate
 
-Stay solo when one focused context can implement and verify the task without hiding independent deliverables. Orchestration has planning and integration overhead; use it for attention isolation, not ceremony.
+Stay solo for small work or an inseparable investigation. Do not split one file
+among concurrent writers. Orchestration must earn its planning and integration
+cost; do not reject useful parallel work merely because one agent could
+eventually finish it.

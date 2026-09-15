@@ -1,15 +1,28 @@
 ---
 name: unlazy
-description: Enforces completion discipline for substantial autonomous work by writing acceptance gates before execution, decomposing work with the Depth Tree, running approved checks, and re-verifying evidence before reporting. Use when GitHub Copilot CLI faces a long or multi-part task, work that has returned half-done, an exhaustive audit or build, parallel leaves or pipelines, or explicit triggers such as /unlazy, "tree N", "gates", and "do not stop until it is done".
+description: Use when GitHub Copilot CLI faces substantial multi-part work, integration or hand-off obligations, long autonomous execution, material risk of unnoticed omissions, or work returned half-done; also for /unlazy, "tree N", "gates", or "do not stop until it is done". Not for trivial edits or factual replies.
 ---
 
 # Unlazy
 
-Make incomplete work visible and make completion testable. Prove outcomes against a ledger instead of relying on a confident done report.
+Make incomplete work visible and completion testable. Prove the requested
+outcomes, then stop. Completeness is mandatory; speculative improvements and
+endless polish are not.
+
+Use this discipline proactively for substantial work, without waiting for an
+explicit slash command. Follow the user's scope and applicable safety rules.
+Strong reasoning serves the outcome; it does not require more passes or agents.
 
 ## Write gates before real work
 
-Create `GATES.md` from [templates/gates-leaf.md](templates/gates-leaf.md) before implementing. State one observable outcome per gate. Give every runnable gate an indented `CHECK:` and `EXPECT:`; use a manual gate only when no command can decide the outcome.
+Reuse the existing contract and gates ledger. If none exists, create `GATES.md`
+from [templates/gates-leaf.md](templates/gates-leaf.md) in the task/session
+workspace before implementing; use the repository's required location when one
+exists. Keep the scope, non-goals, and evidence together, not in duplicate plans.
+State one observable outcome per gate, including relevant integration and
+failure cases. Use existing check commands where possible. Give runnable gates
+indented `CHECK:` and `EXPECT:` fields; use a manual gate only when no command
+can decide the outcome. Do not gate on activity counts or optional polish.
 
 Treat `CHECK:` as code. Before executing an inherited ledger, parse it without running anything and read every command and called script:
 
@@ -31,13 +44,13 @@ Do not silently remove an impossible gate. Add `ABANDON: <id> <non-empty reason>
 
 ## Pick the smallest fitting mode
 
-- **Solo:** Use one `GATES.md` for a focused task that fits one working session.
-- **Orchestrated:** For a build or deep review, read [references/method.md](references/method.md) and [references/orchestration.md](references/orchestration.md). Write the contract and tree before fan-out. Give every leaf and branch its own gates file.
+- **Solo:** Use one ledger when one focused worker can deliver and verify the outcome efficiently.
+- **Orchestrated:** Choose this proactively when sizeable independent work or separate context produces enough delivery benefit to justify coordination. Read [references/method.md](references/method.md) and [references/orchestration.md](references/orchestration.md). Reuse the contract; declare dependencies and ownership before fan-out. Give each actual leaf and integration branch its own gates file. A build or review label alone does not require a tree.
 - **Parallel:** Before dispatching concurrent leaves or pipelines, also read [references/parallel.md](references/parallel.md). Declare disjoint `OWNS:` paths and claim them. Treat scopes and leases as coordination, never as filesystem isolation or a security boundary.
 
 Keep check execution sequential by default. Use `--jobs <N>` only for independent runnable gates when deterministic parallel verification saves wall-clock time. Continue printing and recording results in gate order.
 
-## Build the Depth Tree
+## Build the Depth Tree when orchestration is worthwhile
 
 1. Split at natural task boundaries. Use the requested depth only while each leaf remains a coherent deliverable.
 2. Give each leaf a narrow contract, exact file ownership, and its own ledger.
@@ -47,14 +60,32 @@ Keep check execution sequential by default. Use `--jobs <N>` only for independen
 
 Use rolling dispatch: when a verified leaf unblocks another, dispatch the newly ready leaf without waiting for unrelated in-flight work. Keep states and dependencies in `PLAN.md`; append events to the scope status log.
 
-## Work each leaf in four passes
+## Complete each leaf against its contract
 
-1. Implement the complete deliverable. Leave no placeholders or deferred remainder.
-2. Re-read it as a domain expert and replace the cheap version of each part.
-3. Hunt correctness, integration, portability, performance, and evidence defects. Fix what you find.
-4. Apply low-cost polish, then repeat until a full improvement pass finds nothing.
+1. Implement the whole agreed deliverable, including its required integration
+   and failure behavior. Leave no placeholders, disconnected parts, or deferred
+   remainder. Choose the simplest maintainable implementation, not a shortcut.
+2. Run the required checks and inspect the changed behavior against the contract
+   and named risks. Use independent review when it addresses material uncertainty
+   or is required, not as a ritual on every leaf.
+3. Fix demonstrated in-scope defects and rerun affected checks. Do not weaken a
+   gate or expand the product to make the result look complete. Keep one initial
+   review and at most one fix-only replay; further review needs approval naming
+   the remaining defect and a stop condition.
+4. Stop once required gates have current evidence, required review is satisfied,
+   and cleanup is complete. No extra pass to find something else to improve.
 
-Finish a leaf only after the pass is clean and every gate is met with evidence or visibly abandoned.
+Evidence stays current while the relevant artifacts, dependencies, and
+environment are unchanged. Required parent `--reverify` and integration checks
+still run; an additional status message alone is not a reason to repeat them.
+An abandoned required gate is **incomplete**, never a successful leaf.
+
+After two failed repairs of the same secondary tooling blocker, stop that repair
+loop and surface the missing evidence. Check elapsed time at tool-return
+boundaries: after 15 minutes without a requested-artifact change or a completed
+acceptance check, seek approval before more preparation. Counts carry across
+workers and resumes. Continue independent authorized work only when the pending
+decision cannot change it; preserve live-operation monitoring and cleanup.
 
 ## Author gates that can fail honestly
 
@@ -69,7 +100,11 @@ Remember that the checker proves only the declared command oracle. It cannot inf
 
 ## Audit the final report
 
-Re-measure every number and completion claim immediately before reporting. Use qualified ids such as `leaf-1.2.1:G3`. Report the measured met, unmet, and abandoned counts and surface every abandonment. Do not compose a done report while any required gate remains unmet.
+Derive completion claims from the final ledger and evidence on the final relevant
+state. Recalculate reported counts, not unchanged checks. Use qualified ids such
+as `leaf-1.2.1:G3` in the evidence record. Keep the user summary plain and brief;
+surface every unmet or abandoned requirement. Do not compose a done report while
+any required outcome remains unmet or abandoned.
 
 ## Offer the optional Copilot CLI agentStop hook, but never configure it
 
@@ -98,6 +133,11 @@ Copilot CLI reads hook configuration when it starts, so tell the user to restart
 
 ## Spend attention where it compounds
 
-Keep leaf briefs to the contract and one ledger. Append status instead of rewriting history. Use stronger reasoning for design, integration, and verification; use cheaper execution only for genuinely mechanical leaves. Read [references/token-economy.md](references/token-economy.md) for the detailed rules.
+Keep leaf briefs to the contract, ownership, and one ledger. Append status instead
+of rewriting history. Use stronger reasoning for uncertain decisions and difficult
+integration; use faster execution for well-specified mechanical leaves only when
+the same quality bar holds. Respect runtime model/effort preferences and permitted
+overrides. Read [references/token-economy.md](references/token-economy.md) when
+model or context allocation needs it.
 
 Do not create gates for a trivial edit or factual reply. Use this discipline when the cost of quiet incompleteness justifies the ledger.

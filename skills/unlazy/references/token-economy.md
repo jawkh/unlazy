@@ -18,21 +18,33 @@ Spend model attention on implementation and judgment. Move repeated, determinist
 
 ## Spend stronger reasoning on leverage points
 
-Use the strongest available review for:
+Use capable reasoning and enough effort for the actual uncertainty in:
 
 - contracts and architecture
 - security and compatibility boundaries
 - branch integration
 - manual high-risk gates
-- parent re-verification and final claim audit
+- interpreting verification failures and disputed evidence
 
-Use lower-cost execution for mechanical transformations only after the pattern and acceptance gates are fixed.
+Running an established check or reading its result does not by itself require
+another frontier reviewer. Respect user model choices and runtime-resolved
+preferences; verify supported overrides before using them. Use lower-effort or
+faster execution for mechanical transformations only after the pattern and gates
+are fixed and the same quality bar can be met.
+
+Give reasoning models the outcome, constraints, source context, and evidence
+contract rather than a script for their internal thinking. Use a qualified
+different family when independent judgment is worthwhile. Do not require
+maximum effort, model diversity, or multiple reviews on every leaf.
 
 ## Avoid false economy
 
 Do not save time by skipping approval, negative controls, parent re-verification, or integration gates. Those checks exist because a fast false completion costs more than a direct failure.
 
-Do not orchestrate a task that one focused session can implement and verify cleanly. Conversely, do not keep an entire build in one context merely to avoid subagent overhead when independent leaves and contracts are clear.
+Proactively orchestrate sizeable independent work when overlap or separate
+judgment outweighs coordination cost. Keep small, coupled work direct. Stop at
+the completed contract, not at the point where no further improvement is
+imaginable.
 
 ## Measurement claims
 
