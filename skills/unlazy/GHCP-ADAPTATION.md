@@ -15,9 +15,9 @@ Every carried-over file is byte-identical to that commit unless it is listed und
 
 ## Selected payload
 
-Carried over unchanged: `LICENSE`, `references/gates.md`, `references/method.md`, `references/parallel.md`, `references/token-economy.md`, `research/validation-protocol.md`, `scripts/gate-check.mjs`, `scripts/lib/gates.mjs`, `scripts/lib/regex-worker.mjs`, `templates/PLAN.md`, `templates/gates-leaf.md`, `templates/gates-node.md`.
+Carried over unchanged: `LICENSE`, `references/gates.md`, `references/parallel.md`, `research/validation-protocol.md`, `scripts/gate-check.mjs`, `scripts/lib/gates.mjs`, `scripts/lib/regex-worker.mjs`, `templates/PLAN.md`, `templates/gates-leaf.md`, `templates/gates-node.md`.
 
-Carried over and edited: `SKILL.md`, `SECURITY.md`, `references/orchestration.md`.
+Carried over and edited: `SKILL.md`, `SECURITY.md`, `references/method.md`, `references/orchestration.md`, `references/token-economy.md`.
 
 Added here: `scripts/copilot-stop-hook.mjs`, `scripts/print-copilot-hook.mjs`, this file.
 
@@ -41,6 +41,16 @@ Nothing in this payload reads or writes Claude configuration.
 5. `scripts/copilot-stop-hook.mjs` is a port of the upstream Stop hook. It keeps the scope and session resolution, unmet and invalid gate detection, the serialized per-session progress state, the six-block no-progress release, and the fail-open behavior when state cannot be updated safely. It reads `sessionId`, `cwd`, and `stop_hook_active`, accepts the snake_case spellings too, writes exactly one compact decision to stdout, and sends diagnosis to stderr. It never executes a gate.
 6. **The upstream installer was not ported.** `scripts/print-copilot-hook.mjs` replaces it and is a printer, not a mutator. It emits one compact `agentStop` document to stdout: `{"version":1,"hooks":{...}}` by default, or `{"hooks":{...}}` with `--inline`. The handler carries absolute packaged Node and script paths, a `bash` command and a `powershell` command with POSIX and PowerShell quoting, the stable `env.UNLAZY_HOOK_OWNER` marker, and a bounded `timeoutSec` of 20. `--scope ID` is validated by the same `validateScopeId` the rest of the skill uses. The script opens no file for writing and makes no network call; it imports only `node:path`, `node:url`, and that shared validator. A rejected invocation prints to stderr, exits 2, and writes nothing to stdout.
 7. The destination is chosen and edited by a human, so this payload no longer resolves `COPILOT_HOME` or a user home directory at all. The documented user-level location remains the one Copilot CLI reads: `$COPILOT_HOME/hooks/unlazy.json` when `COPILOT_HOME` is set, and `<user home>/.copilot/hooks/unlazy.json` otherwise. A configured `COPILOT_HOME` replaces the default outright and never gains an extra `.copilot` segment.
+8. User-authorized local tuning on 2026-09-15 changes `SKILL.md` and the method,
+   orchestration, and token-economy references to use contract-based completion
+   rather than repeated polish. Substantial work invokes gates proactively;
+   worthwhile parallel work does not require a separate user prompt. Reviews and
+   secondary tooling repairs are bounded. Required evidence, parent
+   re-verification, integration, approval semantics, and all executable files
+   are unchanged. These changes belong to the managed GHCP fork; the source pin
+   above records the upstream adaptation baseline, not the current fork commit.
+   The installer record identifies each approved snapshot. Prior snapshots are
+   retained untouched.
 
 ## Gaps
 

@@ -8,14 +8,14 @@ The original v1 method claimed that each binary split multiplied effort. A small
 
 1. **Make layer 1 the requested task.** Split only at real domain, component, or verification boundaries. Binary splits are optional.
 2. **Make each leaf one coherent deliverable.** Give it exact ownership, dependencies, and acceptance gates. Merge tiny adjacent leaves; split a leaf that hides several independent outcomes.
-3. **Fix contracts before fan-out.** Record interfaces, formats, shared assumptions, error conventions, naming, and ownership in `PLAN.md` before a leaf starts.
+3. **Fix contracts before fan-out.** Reference the existing contract; record only the interfaces, dependencies and ownership needed for workers to compose in `PLAN.md`. Do not recreate the specification.
 4. **Give branches integration gates.** Verify child ledgers again, then test interfaces, end-to-end behavior, and regressions across the joined work.
-5. **Use gates and passes as the effort control.** Finish implementation, expert reread, defect hunt, and low-cost polish. Stop only when every required gate has current evidence and another improvement pass finds nothing.
+5. **Use the contract as the stop condition.** Complete the deliverable, run required checks, and fix demonstrated in-scope defects. Stop when required gates have current evidence, required review is satisfied, and cleanup is complete. No improvement-until-clean loop. Apply the bounded review and blocker rules in `SKILL.md`.
 
 ## Choose depth
 
 - Use a shallow tree or solo ledger for a feature, contained bug hunt, or document.
-- Use an orchestrated tree when several coherent deliverables benefit from fresh contexts or independent ownership.
+- Proactively use an orchestrated tree when sizeable independent deliverables benefit enough from parallel work or fresh context to outweigh coordination and integration.
 - Use a deeper tree only when its additional branches correspond to real integration boundaries. Do not add empty hierarchy to satisfy a number.
 - Honor an explicit `tree N` request while keeping leaves meaningful. If the requested depth would create filler leaves, state the mismatch and use the closest honest decomposition.
 
